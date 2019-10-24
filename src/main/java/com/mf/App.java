@@ -38,6 +38,7 @@ public class App {
             System.out.println("Logs are available in : " + CiServices.getAllowedStorageFile().getAbsolutePath() + "\\nga\\logs");
 
             System.out.println("Please (1)add pipeline in ALM Octane, (2) run the pipeline from ALM Octane ");
+            System.out.println("If your CI Server is not visible in ALM Octane, check in log file for errors.");
             System.in.read();
         } catch (IOException e) {
             System.out.println("Exception occurred" + e.getMessage());
