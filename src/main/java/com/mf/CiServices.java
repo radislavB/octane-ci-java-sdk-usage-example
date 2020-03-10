@@ -124,7 +124,7 @@ public class CiServices extends CIPluginServices {
 
         sentFinishEvent(jobId, buildId, true);
         OctaneSDK.getClients().forEach(client ->
-                client.getTestsService().enqueuePushTestsResult(jobId, buildId));
+                client.getTestsService().enqueuePushTestsResult(jobId, buildId, null));
 
     }
 
