@@ -43,6 +43,8 @@ public class CiServices extends CIPluginServices {
     private static final Map<String, String> ciJobsKey2Name = new HashMap();
 
     public CiServices() {
+
+        //Job that exist in CI Server
         ciJobsKey2Name.put("jobA", "Job A simple");
         ciJobsKey2Name.put("jobB", "Job B complex");
         ciJobsKey2Name.put("jobC", "Job C important");
@@ -61,16 +63,25 @@ public class CiServices extends CIPluginServices {
         }
     }
 
+    /***
+     * Info about ci server
+     * @return
+     */
+
     @Override
     public CIServerInfo getServerInfo() {
         CIServerInfo result = dtoFactory.newDTO(CIServerInfo.class);
         result.setType(ciServerType)
                 .setVersion(ciServerVersion)
-                .setUrl(ciServerUrl)
+                .setUrl(ciServerUrl) //External link to CI Server, so it would be possible to reach ci server from browser
                 .setSendingTime(System.currentTimeMillis());
         return result;
     }
 
+    /***
+     * Info about plugin
+     * @return
+     */
     @Override
     public CIPluginInfo getPluginInfo() {
         CIPluginInfo result = dtoFactory.newDTO(CIPluginInfo.class);
@@ -78,6 +89,10 @@ public class CiServices extends CIPluginServices {
         return result;
     }
 
+    /***
+     * Path for saving log and additional auxiliary files. It should be the path that application should have permissions to write to.
+     * @return
+     */
     @Override
     public File getAllowedOctaneStorage() {
         return getAllowedStorageFile();
@@ -89,6 +104,11 @@ public class CiServices extends CIPluginServices {
         return f;
     }
 
+    /***
+     * Get list of job existing in CI Server. This list is used by Add new pipeline dialog in ALM Octane
+     * @param includeParameters
+     * @return
+     */
     @Override
     public CIJobsList getJobsList(boolean includeParameters) {
 
@@ -103,6 +123,11 @@ public class CiServices extends CIPluginServices {
         return result.setJobs(list.toArray(new PipelineNode[list.size()]));
     }
 
+    /***
+     * Get job by its jobId.
+     * @param rootJobId
+     * @return
+     */
     @Override
     public PipelineNode getPipeline(String rootJobId) {
         System.out.println("Get pipeline node for " + rootJobId);
@@ -111,25 +136,46 @@ public class CiServices extends CIPluginServices {
                 .setName(ciJobsKey2Name.get(rootJobId));
     }
 
+    /***
+     * This method is called from ALM Octane
+     * @param jobId
+     * @param originalBody
+     */
     @Override
     public void runPipeline(String jobId, String originalBody) {
         String buildId = System.currentTimeMillis() + "";
         System.out.println("Running job " + jobId + ", build id is " + buildId);
+
+
+
+        //Start event should be send on job started event that received from CI server and not in runPipeline,
+        // as job might be started in delay or even stuck because of missing free agent
         sentStartEvent(jobId, buildId);
+
+        //simulation of execution
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        sentFinishEvent(jobId, buildId, true);
+        //Finish event should be send on event that received from CI
+        sentFinishEvent(jobId, buildId, true/*flag indicating whether job has test results*/);
 
-        //indicate to sdk that there are tests
+        //indicate to SDK that there are tests in job+build. Later SDK will call getTestsResult method to get stream to test result file
         OctaneSDK.getClients().forEach(client ->
                 client.getTestsService().enqueuePushTestsResult(jobId, buildId, null));
 
     }
 
+    /***
+     * Stream to test results in Octane format
+     * See more details about format : https://admhelp.microfocus.com/octane/en/15.0.40/Online/Content/API/test-results.htm
+     *
+     * @param jobId
+     * @param buildId
+     * @return
+     */
     @Override
     public InputStream getTestsResult(String jobId, String buildId) {
         System.out.println("Sending test results for  " + jobId + "#" + buildId);
@@ -145,10 +191,10 @@ public class CiServices extends CIPluginServices {
         System.out.println("Sending start event for  " + jobId + "#" + buildId);
         CIEvent event = dtoFactory.newDTO(CIEvent.class)
                 .setEventType(CIEventType.STARTED)
-                .setProject(jobId)
-                .setProjectDisplayName(ciJobsKey2Name.get(jobId))
-                .setBuildCiId(buildId)
-                .setNumber(buildId)
+                .setProject(jobId)//job id
+                .setProjectDisplayName(ciJobsKey2Name.get(jobId)) //job display name
+                .setBuildCiId(buildId)//build id
+                .setNumber(buildId)//build display name
                 .setStartTime(System.currentTimeMillis())
                 .setEstimatedDuration(10l);
 
