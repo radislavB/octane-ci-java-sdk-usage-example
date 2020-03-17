@@ -116,8 +116,8 @@ public class CiServices extends CIPluginServices {
         List<PipelineNode> list = new ArrayList<>();
         for (Map.Entry<String, String> e : ciJobsKey2Name.entrySet()) {
             list.add(dtoFactory.newDTO(PipelineNode.class)
-                    .setJobCiId(e.getKey())
-                    .setName(e.getValue()));
+                    .setJobCiId(e.getKey())//job key
+                    .setName(e.getValue()));//display name
         }
         CIJobsList result = dtoFactory.newDTO(CIJobsList.class);
         return result.setJobs(list.toArray(new PipelineNode[list.size()]));
@@ -191,14 +191,14 @@ public class CiServices extends CIPluginServices {
         System.out.println("Sending start event for  " + jobId + "#" + buildId);
         CIEvent event = dtoFactory.newDTO(CIEvent.class)
                 .setEventType(CIEventType.STARTED)
-                .setProject(jobId)//job id
+                .setProject(jobId)//job key id
                 .setProjectDisplayName(ciJobsKey2Name.get(jobId)) //job display name
                 .setBuildCiId(buildId)//build id
                 .setNumber(buildId)//build display name
                 .setStartTime(System.currentTimeMillis())
                 .setEstimatedDuration(10l);
 
-        event.setPhaseType(PhaseType.POST);
+        event.setPhaseType(PhaseType.INTERNAL);
         publishEvent(event);
     }
 
