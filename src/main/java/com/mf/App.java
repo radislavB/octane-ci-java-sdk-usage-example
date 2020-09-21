@@ -17,7 +17,7 @@ public class App {
 
     //Plugin configuration settings , should be saved
     public static String INSTANCE_ID = "9d8ee555-3660-469e-91e5-d7c7e9443966";
-    public static String OCTANE_SERVER_URL = "http://localhost:8080";
+    public static String OCTANE_SERVER_URL = "http://localhost:8080/octane";
     public static String SPACE_ID = "1001";
     public static String CLIENT_ID = "sa@nga";
     public static String CLIENT_PASSWORD = "Welcome1";//should be save encrypted
@@ -64,7 +64,7 @@ public class App {
 
     private static void startSdk(List<PluginSettings> settings) {
         settings.forEach(s->{
-            OctaneConfiguration octaneConfiguration = new OctaneConfiguration(s.getInstanceId(), s.getOctaneServerUrl(), s.getOctaneSpace());
+            OctaneConfiguration octaneConfiguration = OctaneConfiguration.create(s.getInstanceId(), s.getOctaneServerUrl(), s.getOctaneSpace());
             octaneConfiguration.setClient(s.getClientId());
             octaneConfiguration.setSecret(s.getClientPassword());
             OctaneSDK.addClient(octaneConfiguration, CiServices.class);

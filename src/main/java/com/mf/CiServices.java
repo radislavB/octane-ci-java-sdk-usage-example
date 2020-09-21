@@ -107,10 +107,11 @@ public class CiServices extends CIPluginServices {
     /***
      * Get list of job existing in CI Server. This list is used by Add new pipeline dialog in ALM Octane
      * @param includeParameters
+     * @param workspaceId
      * @return
      */
     @Override
-    public CIJobsList getJobsList(boolean includeParameters) {
+    public CIJobsList getJobsList(boolean includeParameters, Long workspaceId) {
 
         System.out.println("Get pipeline list ");
         List<PipelineNode> list = new ArrayList<>();

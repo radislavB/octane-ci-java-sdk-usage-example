@@ -11,7 +11,7 @@
   <properties>
     <jdk.version>1.8</jdk.version>
     <maven.compiler.plugin.version>3.6.1</maven.compiler.plugin.version>
-    <ci.sdk.version>2.6.2.0</ci.sdk.version>
+    <ci.sdk.version>2.6.4.39</ci.sdk.version>
   </properties>
 
   <dependencies>
