@@ -10,20 +10,18 @@ import com.hp.octane.integrations.dto.events.PhaseType;
 import com.hp.octane.integrations.dto.general.CIJobsList;
 import com.hp.octane.integrations.dto.general.CIPluginInfo;
 import com.hp.octane.integrations.dto.general.CIServerInfo;
-import com.hp.octane.integrations.dto.general.CIServerTypes;
 import com.hp.octane.integrations.dto.pipelines.PipelineNode;
 import com.hp.octane.integrations.dto.snapshots.CIBuildResult;
+import com.hp.octane.integrations.dto.tests.BuildContext;
+import com.hp.octane.integrations.dto.tests.TestRun;
+import com.hp.octane.integrations.dto.tests.TestRunResult;
+import com.hp.octane.integrations.dto.tests.TestsResult;
 import com.hp.octane.integrations.utils.CIPluginSDKUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CiServices extends CIPluginServices {
 
@@ -33,8 +31,8 @@ public class CiServices extends CIPluginServices {
     private static final String ciServerType = "MyCustomCiServerType";//CIServerTypes.JENKINS.value();//;
     private static final String ciServerUrl = "http://demo.ci-server:8080";//replace by real link to ci server
 
-    private static final boolean hasProxySettings = true;
-    private static final String proxyServer = "web-proxy.il.hpecorp.net";
+    private static final boolean hasProxySettings = false;
+    private static final String proxyServer = "";//web-proxy.il.softwaregrp.net
     private static final Integer proxyPort = 8080;
     private static final String proxyUser = "";
     private static final String proxyPassword = "";
@@ -148,7 +146,6 @@ public class CiServices extends CIPluginServices {
         System.out.println("Running job " + jobId + ", build id is " + buildId);
 
 
-
         //Start event should be send on job started event that received from CI server and not in runPipeline,
         // as job might be started in delay or even stuck because of missing free agent
         sentStartEvent(jobId, buildId);
@@ -180,12 +177,17 @@ public class CiServices extends CIPluginServices {
     @Override
     public InputStream getTestsResult(String jobId, String buildId) {
         System.out.println("Sending test results for  " + jobId + "#" + buildId);
-        try {
-            InputStream result = new FileInputStream(new File("results", "mqmTests.xml"));
-            return result;
-        } catch (FileNotFoundException e) {
-            return null;
-        }
+
+        TestRun tr1 = dtoFactory.newDTO(TestRun.class).setTestName("testAppA").setPackageName("MF.simple.tests").setClassName("AppTest").setDuration(5).setResult(TestRunResult.PASSED);
+        TestRun tr2 = dtoFactory.newDTO(TestRun.class).setTestName("testAppB").setPackageName("MF.simple.tests").setClassName("AppTest").setDuration(6).setResult(TestRunResult.FAILED);
+        TestRun tr3 = dtoFactory.newDTO(TestRun.class).setTestName("testAppC").setPackageName("MF.simple.tests").setClassName("AppTest").setDuration(7).setResult(TestRunResult.PASSED);
+        BuildContext buildContext = dtoFactory.newDTO(BuildContext.class).setJobId(jobId).setBuildId(buildId).setServerId("to-be-filled-in-SDK");
+        TestsResult results = dtoFactory.newDTO(TestsResult.class).setTestRuns(Arrays.asList(tr1, tr2, tr3)).setBuildContext(buildContext);
+        //InputStream result = new FileInputStream(new File("results", "mqmTests.xml"));
+        String xml = dtoFactory.dtoToXml(results);
+        InputStream result = dtoFactory.dtoToXmlStream(results);
+        return result;
+
     }
 
     private void sentStartEvent(String jobId, String buildId) {
