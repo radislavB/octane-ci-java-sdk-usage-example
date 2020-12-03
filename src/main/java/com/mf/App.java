@@ -17,7 +17,7 @@ public class App {
 
     //Plugin configuration settings , should be saved
     public static String INSTANCE_ID = "9d8ee555-3660-469e-91e5-d7c7e9443966";
-    public static String OCTANE_SERVER_URL = "http://localhost:8080";
+    public static String OCTANE_SERVER_URL = "http://localhost:8080/dev";
     public static String SPACE_ID = "1001";
     public static String CLIENT_ID = "sa@nga";
     public static String CLIENT_PASSWORD = "Welcome1";//should be save encrypted

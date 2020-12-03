@@ -10,6 +10,7 @@ import com.hp.octane.integrations.dto.events.PhaseType;
 import com.hp.octane.integrations.dto.general.CIJobsList;
 import com.hp.octane.integrations.dto.general.CIPluginInfo;
 import com.hp.octane.integrations.dto.general.CIServerInfo;
+import com.hp.octane.integrations.dto.parameters.CIParameters;
 import com.hp.octane.integrations.dto.pipelines.PipelineNode;
 import com.hp.octane.integrations.dto.snapshots.CIBuildResult;
 import com.hp.octane.integrations.dto.tests.BuildContext;
@@ -138,10 +139,10 @@ public class CiServices extends CIPluginServices {
     /***
      * This method is called from ALM Octane
      * @param jobId
-     * @param originalBody
+     * @param ciParameters
      */
     @Override
-    public void runPipeline(String jobId, String originalBody) {
+    public void runPipeline(String jobId, CIParameters ciParameters) {
         String buildId = System.currentTimeMillis() + "";
         System.out.println("Running job " + jobId + ", build id is " + buildId);
 
@@ -178,9 +179,12 @@ public class CiServices extends CIPluginServices {
     public InputStream getTestsResult(String jobId, String buildId) {
         System.out.println("Sending test results for  " + jobId + "#" + buildId);
 
-        TestRun tr1 = dtoFactory.newDTO(TestRun.class).setTestName("testAppA").setPackageName("MF.simple.tests").setClassName("AppTest").setDuration(5).setResult(TestRunResult.PASSED);
-        TestRun tr2 = dtoFactory.newDTO(TestRun.class).setTestName("testAppB").setPackageName("MF.simple.tests").setClassName("AppTest").setDuration(6).setResult(TestRunResult.FAILED);
-        TestRun tr3 = dtoFactory.newDTO(TestRun.class).setTestName("testAppC").setPackageName("MF.simple.tests").setClassName("AppTest").setDuration(7).setResult(TestRunResult.PASSED);
+        TestRun tr1 = dtoFactory.newDTO(TestRun.class).setTestName("testAppA").setPackageName("MF.simple.tests")
+                .setClassName("AppTest").setDuration(5).setResult(TestRunResult.PASSED).setStarted(System.currentTimeMillis());
+        TestRun tr2 = dtoFactory.newDTO(TestRun.class).setTestName("testAppB").setPackageName("MF.simple.tests")
+                .setClassName("AppTest").setDuration(6).setResult(TestRunResult.FAILED).setStarted(System.currentTimeMillis());
+        TestRun tr3 = dtoFactory.newDTO(TestRun.class).setTestName("testAppC").setPackageName("MF.simple.tests")
+                .setClassName("AppTest").setDuration(7).setResult(TestRunResult.PASSED).setStarted(System.currentTimeMillis());
         BuildContext buildContext = dtoFactory.newDTO(BuildContext.class).setJobId(jobId).setBuildId(buildId).setServerId("to-be-filled-in-SDK");
         TestsResult results = dtoFactory.newDTO(TestsResult.class).setTestRuns(Arrays.asList(tr1, tr2, tr3)).setBuildContext(buildContext);
         //InputStream result = new FileInputStream(new File("results", "mqmTests.xml"));
